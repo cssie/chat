@@ -5,7 +5,6 @@
  */
 import React, {Component} from 'react';
 import {
-  AppRegistry,
   Image,
   StyleSheet,
   Text,
@@ -16,6 +15,8 @@ import {
 import {
   Actions,
 } from 'react-native-router-flux';
+import  io  from 'socket.io-client';
+
 
 export default class Home extends Component {
 
@@ -78,6 +79,15 @@ export default class Home extends Component {
   }
 
   render() {
+    if (!window.location) {
+      // App is running in simulator
+      window.navigator.userAgent = 'ReactNative';
+    }
+    const socket = io('http://localhost');
+    socket.on('connect', function () {
+      console.log('ddddd');
+    });
+    console.log(socket)
     return (
       <View>
         <Text style={this.state.styles.header}>聊天軟件</Text>
