@@ -22,13 +22,17 @@ import {
 import {
   Actions,
 } from 'react-native-router-flux';
+import io from "socket.io-client";
+
+console.ignoredYellowBox = [ 'Setting a timer' ];
 
 export default class SingleChat extends Component {
 
   constructor(props) {
     super(props);
     this.state = {
-      value: "请输入信息",
+        message: "",
+        id: "001",
       chatHistory: [
         {key: "5",text: "test1", timeStamp: 1523257146633, owner: "mine"},
         {key: "1",text: "test2", timeStamp: 1523257146635, owner: "opposite"},
@@ -116,6 +120,14 @@ export default class SingleChat extends Component {
     };
   }
 
+    componentDidMount(){
+        const socket = io('http://192.168.43.171:3000/');
+        socket.on('connect',function () {
+            console.log('连接得到');
+        })
+        this.socket = socket
+    }
+
   render() {
     return (
       <View style={this.state.styles.container}>
@@ -135,11 +147,9 @@ export default class SingleChat extends Component {
           />
         </ScrollView>
         <View style={this.state.styles.bottom}>
-          <Input style={this.state.styles.input} value={this.state.value}
-                 onChangeText={text => this.setState({value: text})}/>
-          <Button type='primary' size='md' title='发送' style={this.state.styles.sendBtn} onPress={() => {
-            alert(this.state.value)
-          }}/>
+          <Input style={this.state.styles.input} value={this.state.message}
+                 onChangeText={text => this.setState({message: text})}/>
+          <Button type='primary' size='md' title='发送' style={this.state.styles.sendBtn} onPress={() => this.sendMessage()}/>
         </View>
       </View>
     );
@@ -168,5 +178,24 @@ export default class SingleChat extends Component {
         </View>
       </View>
     );
+  }
+
+  sendMessage(){
+      if(this.socket){
+          this.socket.emit('requestMessage', {fromID: this.state.id,toID:'002',message:this.state.message });
+          const self = this;
+          this.socket.on('sendMessage',function (data) {
+              if(data.toID === self.state.id){
+                  console.log('我收到了你的信息了',data.message)
+                  self.setState({message:"",chatHistory:[...self.state.chatHistory,{key: self.state.message,text: self.state.message, timeStamp: 1523257146652, owner: "opposite"}]});
+              }
+              if (data.fromID === self.state.id){
+                  self.setState({message:"",chatHistory:[...self.state.chatHistory,{key: self.state.message,text: self.state.message, timeStamp: 1523257146652, owner: "mine"}]});
+              }
+          })
+      } else {
+          alert('socket断掉啦')
+      }
+
   }
 }

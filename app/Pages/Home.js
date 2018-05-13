@@ -10,7 +10,7 @@ import {
   Text,
   View,
   FlatList,
-  TouchableNativeFeedback,
+    TouchableOpacity,
 } from 'react-native';
 import {
   Actions,
@@ -79,15 +79,6 @@ export default class Home extends Component {
     };
   }
 
-  componentDidMount(){
-      var socket = io('http://192.168.43.171:3000/');
-      socket.on('connect',function () {
-          socket.emit('my', {hello: 'world'});
-          console.log('122222')
-      })
-      console.log(socket);
-  }
-
   render() {
     return (
       <View>
@@ -103,7 +94,7 @@ export default class Home extends Component {
 
   renderchat(data) {
     return (
-      <TouchableNativeFeedback onPress={() => {Actions.SingleChat({'data':data})}}>
+      <TouchableOpacity onPress={() => {Actions.SingleChat({'data':data})}}>
         <View style={this.state.styles.container}>
           <Image
             source={{uri: data.img}}
@@ -114,7 +105,7 @@ export default class Home extends Component {
             <Text style={this.state.styles.content}>{data.latestContent}</Text>
           </View>
         </View>
-      </TouchableNativeFeedback>
+      </TouchableOpacity>
     );
   }
 }
