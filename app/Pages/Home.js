@@ -35,6 +35,7 @@ export default class Home extends Component {
         {key: '10', nickName: '小a', latestContent: '上次我們聊到這裡啦', img: 'http://i.imgur.com/UePbdph.jpg'},
         {key: '11', nickName: '小a', latestContent: '上次我們聊到這裡啦', img: 'http://i.imgur.com/UePbdph.jpg'},
       ],
+      title: '聊天软件'  ,
       styles: StyleSheet.create({
         header: {
           height: px2dp(100),
@@ -78,19 +79,19 @@ export default class Home extends Component {
     };
   }
 
+  componentDidMount(){
+      var socket = io('http://192.168.43.171:3000/');
+      socket.on('connect',function () {
+          socket.emit('my', {hello: 'world'});
+          console.log('122222')
+      })
+      console.log(socket);
+  }
+
   render() {
-    if (!window.location) {
-      // App is running in simulator
-      window.navigator.userAgent = 'ReactNative';
-    }
-    const socket = io('http://localhost');
-    socket.on('connect', function () {
-      console.log('ddddd');
-    });
-    console.log(socket)
     return (
       <View>
-        <Text style={this.state.styles.header}>聊天軟件</Text>
+        <Text style={this.state.styles.header}>{this.state.title}</Text>
         <FlatList
           data={this.state.data}
           renderItem={({item}) => this.renderchat(item)}

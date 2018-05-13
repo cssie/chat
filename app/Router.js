@@ -70,7 +70,6 @@ const router = (...props) => (
                  selectedIcon={'wechat'}
           >
             <Scene component={Home} key="Home_key" initial={true}/>
-            <Scene component={SingleChat} key="SingleChat"/>
           </Stack>
           <Stack key='AddressCard'
                  hideNavBar
@@ -91,7 +90,7 @@ const router = (...props) => (
         </Tabs>
         {/*// 推荐把需要的路由放在<Tabs/>后面，跳转的时候通过key，Actions.Test3_key*/}
         <Scene component={Mine} key="Mine_key"/>
-
+         <Scene component={SingleChat} key="SingleChat"/>
       </Stack>
 
     </Lightbox>

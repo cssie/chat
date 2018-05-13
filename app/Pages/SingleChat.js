@@ -30,13 +30,13 @@ export default class SingleChat extends Component {
     this.state = {
       value: "请输入信息",
       chatHistory: [
-        {key: "5",text: "我生气了", timeStamp: 1523257146633, owner: "mine"},
-        {key: "1",text: "为什么又生气了呀", timeStamp: 1523257146635, owner: "opposite"},
-        {key: "6",text: "你自己好好想想", timeStamp: 1523257146638, owner: "mine"},
-        {key: "2",text: "emmm", timeStamp: 1523257146639, owner: "opposite"},
-        {key: "7",text: "哼", timeStamp: 1523257146640, owner: "mine"},
-        {key: "3",text: "人家是个大老粗嘛", timeStamp: 1523257146643, owner: "opposite"},
-        {key: "8",text: "你就夸我一下，说黄晓芳你最美了嘛", timeStamp: 1523257146646, owner: "mine"},
+        {key: "5",text: "test1", timeStamp: 1523257146633, owner: "mine"},
+        {key: "1",text: "test2", timeStamp: 1523257146635, owner: "opposite"},
+        {key: "6",text: "test3", timeStamp: 1523257146638, owner: "mine"},
+        {key: "2",text: "test4", timeStamp: 1523257146639, owner: "opposite"},
+        {key: "7",text: "dd", timeStamp: 1523257146640, owner: "mine"},
+        {key: "3",text: "ff", timeStamp: 1523257146643, owner: "opposite"},
+        {key: "8",text: "黄晓芳你最美了", timeStamp: 1523257146646, owner: "mine"},
         {key: "4",text: ".....", timeStamp: 1523257146650, owner: "opposite"},],
       styles: StyleSheet.create({
         container: {
