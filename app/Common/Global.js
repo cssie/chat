@@ -45,3 +45,6 @@ global.FONT_SIZE = FontSize;
 // 屏幕适配
 global.px2dp = px2dp;
 
+//ip地址
+global.ip = 'http://192.168.43.171:3000/'
+

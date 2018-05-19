@@ -18,6 +18,7 @@ import {
   Button,
   Popover,
   Label,
+    Toast
 } from 'teaset';
 import {
   Actions,
@@ -32,16 +33,8 @@ export default class SingleChat extends Component {
     super(props);
     this.state = {
         message: "",
-        id: "001",
-      chatHistory: [
-        {key: "5",text: "test1", timeStamp: 1523257146633, owner: "mine"},
-        {key: "1",text: "test2", timeStamp: 1523257146635, owner: "opposite"},
-        {key: "6",text: "test3", timeStamp: 1523257146638, owner: "mine"},
-        {key: "2",text: "test4", timeStamp: 1523257146639, owner: "opposite"},
-        {key: "7",text: "dd", timeStamp: 1523257146640, owner: "mine"},
-        {key: "3",text: "ff", timeStamp: 1523257146643, owner: "opposite"},
-        {key: "8",text: "黄晓芳你最美了", timeStamp: 1523257146646, owner: "mine"},
-        {key: "4",text: ".....", timeStamp: 1523257146650, owner: "opposite"},],
+        id: "",
+      chatHistory: [],
       styles: StyleSheet.create({
         container: {
           flex: 1,
@@ -71,6 +64,7 @@ export default class SingleChat extends Component {
           height: px2dp(80),
           paddingLeft: px2dp(40),
           paddingRight: px2dp(40),
+          paddingBottom: px2dp(80),
         },
         input: {
           width: px2dp(500),
@@ -121,11 +115,42 @@ export default class SingleChat extends Component {
   }
 
     componentDidMount(){
-        const socket = io('http://192.168.43.171:3000/');
+        const socket = io(ip);
         socket.on('connect',function () {
             console.log('连接得到');
         })
         this.socket = socket
+        let self = this;
+        this.socket.on('sendMessage',function (data) {
+            if(data.toID === self.state.id){
+                console.log('我收到了你的信息了',data.message)
+                self.setState({chatHistory:[...self.state.chatHistory,{key: ""+ new Date().getTime(),text: data.message, owner: self.props.data.nickName}]});
+            }
+        })
+
+        function getProps() {
+            if(self.props.data.chats){
+                let chatHistory = [];
+                let id = "";
+                for(let i = 0;i<self.props.data.chats.length;i++){
+                    let owner = "mine";
+                    if(self.props.data.chats[i].fromid === self.props.data.key){
+                        owner = self.props.data.nickName;
+                        id = self.props.data.chats[i].toid;
+                    } else {
+                        id = self.props.data.chats[i].fromid;
+                    }
+                    chatHistory.push({key: self.props.data.chats[i].timeStamp,text: self.props.data.chats[i].text, owner: owner})
+                }
+                self.setState({chatHistory:chatHistory,id:id})
+            } else {
+                setTimeout(function () {
+                    getProps()
+                },3000)
+            }
+        }
+        getProps()
+
     }
 
   render() {
@@ -147,8 +172,11 @@ export default class SingleChat extends Component {
           />
         </ScrollView>
         <View style={this.state.styles.bottom}>
-          <Input style={this.state.styles.input} value={this.state.message}
-                 onChangeText={text => this.setState({message: text})}/>
+          <Input style={this.state.styles.input}
+                 value={this.state.message}
+                 onChangeText={text => this.setState({message: text})}
+                 placeholder ="请输入内容"
+          />
           <Button type='primary' size='md' title='发送' style={this.state.styles.sendBtn} onPress={() => this.sendMessage()}/>
         </View>
       </View>
@@ -158,7 +186,7 @@ export default class SingleChat extends Component {
   singlChat(item) {
     return (
       <View>
-        <View style={[this.state.styles.singleFrame, this.state.styles.mineFrame,item.owner === "opposite" ? {display:"none"} : {display:"flex"}]}>
+        <View style={[this.state.styles.singleFrame, this.state.styles.mineFrame,item.owner === this.props.data.nickName ? {display:"none"} : {display:"flex"}]}>
           <Popover arrow='right' style={[this.state.styles.popOver, this.state.styles.minePop]}>
             <Label text={item.text} numberOfLines={100}/>
           </Popover>
@@ -169,7 +197,7 @@ export default class SingleChat extends Component {
         </View>
         <View style={[this.state.styles.singleFrame,item.owner === "mine" ? {display:"none"} : {display:"flex"}]}>
           <Image
-            source={{uri: this.props.data.img}}
+            source={require('../Resources/images/to.jpg')}
             style={this.state.styles.userImg}
           />
           <Popover arrow='left' style={this.state.styles.popOver}>
@@ -182,20 +210,34 @@ export default class SingleChat extends Component {
 
   sendMessage(){
       if(this.socket){
-          this.socket.emit('requestMessage', {fromID: this.state.id,toID:'002',message:this.state.message });
-          const self = this;
-          this.socket.on('sendMessage',function (data) {
-              if(data.toID === self.state.id){
-                  console.log('我收到了你的信息了',data.message)
-                  self.setState({message:"",chatHistory:[...self.state.chatHistory,{key: self.state.message,text: self.state.message, timeStamp: 1523257146652, owner: "opposite"}]});
-              }
-              if (data.fromID === self.state.id){
-                  self.setState({message:"",chatHistory:[...self.state.chatHistory,{key: self.state.message,text: self.state.message, timeStamp: 1523257146652, owner: "mine"}]});
-              }
-          })
-      } else {
-          alert('socket断掉啦')
-      }
-
+          let self = this;
+          this.socket.emit('requestMessage', {fromID: this.state.id,toID:this.props.data.key,message:this.state.message });
+          this.setState({chatHistory:[...this.state.chatHistory,{key: ""+ new Date().getTime(),text: this.state.message, owner: "mine"}]},()=>{
+              fetch(ip + 'sendMessage',{
+                  method: 'POST',
+                  headers: {
+                      'Accept': 'application/json',
+                      'Content-Type': 'application/json',
+                  },body: JSON.stringify({
+                      fromid: self.state.id,
+                      toid: self.props.data.key,
+                      text: self.state.message
+                  })
+              })
+                  .then((response) => response.json())
+                  .then((responseJson) => {
+                      if(responseJson.status){
+                          console.log(self.state,'发送成功')
+                      } else {
+                      }
+                  })
+                  .catch((error) => {
+                      console.error(error);
+                  });
+              self.setState({message:""})
+              self.socket.emit('sendSuccess')
+          })} else {
+              alert('socket断掉啦')
+          }
   }
 }

@@ -11,6 +11,7 @@ import {
   View,
   FlatList,
     TouchableOpacity,
+    DeviceEventEmitter,
 } from 'react-native';
 import {
   Actions,
@@ -23,17 +24,13 @@ export default class Home extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      data: [{key: '1', nickName: '小a', latestContent: '上次我們聊到這裡啦', img: 'http://i.imgur.com/UePbdph.jpg'},
-        {key: '2', nickName: '小b', latestContent: '上次我們聊到這裡啦', img: 'http://i.imgur.com/UePbdph.jpg'},
-        {key: '3', nickName: '小c', latestContent: '上次我們聊到這裡啦', img: 'http://i.imgur.com/UePbdph.jpg'},
-        {key: '4', nickName: '小a', latestContent: '上次我們聊到這裡啦', img: 'http://i.imgur.com/UePbdph.jpg'},
-        {key: '5', nickName: '小a', latestContent: '上次我們聊到這裡啦', img: 'http://i.imgur.com/UePbdph.jpg'},
-        {key: '6', nickName: '小a', latestContent: '上次我們聊到這裡啦', img: 'http://i.imgur.com/UePbdph.jpg'},
-        {key: '7', nickName: '小a', latestContent: '上次我們聊到這裡啦', img: 'http://i.imgur.com/UePbdph.jpg'},
-        {key: '8', nickName: '小a', latestContent: '上次我們聊到這裡啦', img: 'http://i.imgur.com/UePbdph.jpg'},
-        {key: '9', nickName: '小a', latestContent: '上次我們聊到這裡啦', img: 'http://i.imgur.com/UePbdph.jpg'},
-        {key: '10', nickName: '小a', latestContent: '上次我們聊到這裡啦', img: 'http://i.imgur.com/UePbdph.jpg'},
-        {key: '11', nickName: '小a', latestContent: '上次我們聊到這裡啦', img: 'http://i.imgur.com/UePbdph.jpg'},
+      data: [{key: '1', nickName: '测试用户', latestContent: '上次我們聊到這裡啦',chats:[{
+              "fromid" : "1",
+              "toid" : "2",
+              "text" : "test",
+              "timeStamp" : ""+ new Date().getTime(),
+              "messageSucceed" : true
+      }]},
       ],
       title: '聊天软件'  ,
       styles: StyleSheet.create({
@@ -79,6 +76,50 @@ export default class Home extends Component {
     };
   }
 
+  componentDidMount(){
+      console.log(this)
+      let self = this;
+      function getData(){
+          fetch(ip + 'all',{
+              method: 'POST',
+              headers: {
+                  'Accept': 'application/json',
+                  'Content-Type': 'application/json',
+              },body: JSON.stringify({
+                  owner: self.props.data
+              })
+          })
+              .then((response) => response.json())
+              .then((responseJson) => {
+                  if(responseJson.friends){
+                      for(let i=0;i<responseJson.friends.length;i++){
+                          let latestChat = "";
+                          let chat = [];
+                          for(let j =0;j<responseJson.chats.length;j++){
+                              if(responseJson.friends[i].id === responseJson.chats[j].fromid || responseJson.friends[i].id === responseJson.chats[j].toid){
+                                  latestChat = responseJson.chats[j].text;
+                                  chat.push(responseJson.chats[j])
+                              }
+                          }
+                          self.setState({data:[...self.state.data,{key: responseJson.friends[i].id, nickName: responseJson.friends[i].name, latestContent: latestChat,chats:chat}]},()=>{
+                              setInterval(function () {
+                                  DeviceEventEmitter.emit('getData',self.state.data);
+                              },2000)
+                          })
+                      }
+                  }else{
+                      setTimeout(function () {
+                          getData()
+                      },3000)
+                  }
+              })
+              .catch((error) => {
+                  console.error(error);
+              });
+      }
+      getData()
+  }
+
   render() {
     return (
       <View>
@@ -97,7 +138,7 @@ export default class Home extends Component {
       <TouchableOpacity onPress={() => {Actions.SingleChat({'data':data})}}>
         <View style={this.state.styles.container}>
           <Image
-            source={{uri: data.img}}
+              source={require('../Resources/images/to.jpg')}
             style={this.state.styles.imgStyle}
           />
           <View style={this.state.styles.rightContent}>

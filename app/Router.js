@@ -24,6 +24,7 @@ import Home from './Pages/Home';
 import AddressCard from './Pages/AddressCard';
 import Mine from './Pages/Mine';
 import SingleChat from './Pages/SingleChat';
+import Login from './Pages/login';
 
 const reducerCreate = params => {
   const defaultReducer = new Reducer(params);
@@ -69,7 +70,7 @@ const router = (...props) => (
                  iconName={'wechat'}
                  selectedIcon={'wechat'}
           >
-            <Scene component={Home} key="Home_key" initial={true}/>
+            <Scene component={Home} key="Home_key"/>
           </Stack>
           <Stack key='AddressCard'
                  hideNavBar
@@ -91,6 +92,7 @@ const router = (...props) => (
         {/*// 推荐把需要的路由放在<Tabs/>后面，跳转的时候通过key，Actions.Test3_key*/}
         <Scene component={Mine} key="Mine_key"/>
          <Scene component={SingleChat} key="SingleChat"/>
+         <Scene component={Login} key="Login" initial={true}/>
       </Stack>
 
     </Lightbox>
